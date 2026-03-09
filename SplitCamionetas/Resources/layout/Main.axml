@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+	<ImageView
+        android:src="@drawable/LogosA"
+        android:layout_width="match_parent"
+        android:layout_height="106.5dp"
+        android:id="@+id/iVlogo"/>
+	<ImageView
+        android:src="@drawable/preesplit"
+        android:layout_width="match_parent"
+        android:layout_height="106.5dp"
+        android:id="@+id/preesplit" />
+	<TextView
+        android:text="Pre Armado de Tarimas Camionetas"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvlogin"
+        android:gravity="center"/>
+	<TextView
+        android:textColor="@android:color/white"
+        android:text="Responsable:"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView2" />
+	<Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner2"
+        android:spinnerMode="dropdown"
+        android:foregroundTint="@android:color/white"
+        android:backgroundTint="@android:color/white"
+        />
+	<Button
+        android:text="Login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnlogin"
+        android:autoSizeTextType="uniform"
+        android:soundEffectsEnabled="true"/>
+	<TextView
+        android:text="Pre/Split Camionetas - Versión: 3.5"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:gravity="right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/versionApp" />
+	<Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner1"
+        android:popupBackground="#233150"
+        android:spinnerMode="dropdown"
+        android:foregroundTint="@android:color/white"
+        android:backgroundTint="@android:color/white"
+        android:visibility="invisible"/>
+</LinearLayout>

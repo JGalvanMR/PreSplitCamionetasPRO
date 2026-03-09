@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:stretchColumns="*">
+	<LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayoutHorizontal">
+		<ImageView
+            android:src="@drawable/producto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imgPers"
+            android:layout_gravity="center"
+            android:scaleType="centerInside"
+            android:paddingRight="2.0pt"/>
+		<LinearLayout
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:minWidth="25dp"
+            android:minHeight="25dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/linearLayout1">
+			<TextView
+                android:text="Text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtName"
+                android:textColor="@android:color/white"
+                android:textSize="9pt"
+                android:paddingLeft="3pt" />
+			<TextView
+                android:text="Text"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/txtAge"
+                android:textColor="@android:color/white"
+                android:typeface="normal"
+                android:textSize="7.3pt"
+                android:paddingLeft="3pt"
+                android:layout_marginLeft="4.0dp" />
+		</LinearLayout>
+	</LinearLayout>
+</AbsoluteLayout>

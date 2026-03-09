@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://189.206.160.206:81/WebServiceEmbarques" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://189.206.160.206:81/WebServiceEmbarques" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://189.206.160.206:81/WebServiceEmbarques">
+      <s:element name="HelloWorld">
+        <s:complexType />
+      </s:element>
+      <s:element name="HelloWorldResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="HelloWorldResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EnviarPosibleDiferenciaEmbarques">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="id_embarque" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Tipo" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EnviarPosibleDiferenciaEmbarquesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="EnviarPosibleDiferenciaEmbarquesResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendMail">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Dest" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="mBody" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="mAsunto" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendMailResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="Activarboton">
+        <s:complexType />
+      </s:element>
+      <s:element name="ActivarbotonResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ActivarbotonResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ActivarHoraInicio">
+        <s:complexType />
+      </s:element>
+      <s:element name="ActivarHoraInicioResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ActivarHoraInicioResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Version">
+        <s:complexType />
+      </s:element>
+      <s:element name="VersionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="VersionResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VersionAguilares">
+        <s:complexType />
+      </s:element>
+      <s:element name="VersionAguilaresResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="VersionAguilaresResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VersionUbicaciones">
+        <s:complexType />
+      </s:element>
+      <s:element name="VersionUbicacionesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="VersionUbicacionesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendMailPersonal">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Dest" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="mBody" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="mAsunto" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="usuario" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="contraseña" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="direccioncorreo" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendMailPersonalResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="string" nillable="true" type="s:string" />
+      <s:element name="boolean" type="s:boolean" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="HelloWorldSoapIn">
+    <wsdl:part name="parameters" element="tns:HelloWorld" />
+  </wsdl:message>
+  <wsdl:message name="HelloWorldSoapOut">
+    <wsdl:part name="parameters" element="tns:HelloWorldResponse" />
+  </wsdl:message>
+  <wsdl:message name="EnviarPosibleDiferenciaEmbarquesSoapIn">
+    <wsdl:part name="parameters" element="tns:EnviarPosibleDiferenciaEmbarques" />
+  </wsdl:message>
+  <wsdl:message name="EnviarPosibleDiferenciaEmbarquesSoapOut">
+    <wsdl:part name="parameters" element="tns:EnviarPosibleDiferenciaEmbarquesResponse" />
+  </wsdl:message>
+  <wsdl:message name="SendMailSoapIn">
+    <wsdl:part name="parameters" element="tns:SendMail" />
+  </wsdl:message>
+  <wsdl:message name="SendMailSoapOut">
+    <wsdl:part name="parameters" element="tns:SendMailResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActivarbotonSoapIn">
+    <wsdl:part name="parameters" element="tns:Activarboton" />
+  </wsdl:message>
+  <wsdl:message name="ActivarbotonSoapOut">
+    <wsdl:part name="parameters" element="tns:ActivarbotonResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActivarHoraInicioSoapIn">
+    <wsdl:part name="parameters" element="tns:ActivarHoraInicio" />
+  </wsdl:message>
+  <wsdl:message name="ActivarHoraInicioSoapOut">
+    <wsdl:part name="parameters" element="tns:ActivarHoraInicioResponse" />
+  </wsdl:message>
+  <wsdl:message name="VersionSoapIn">
+    <wsdl:part name="parameters" element="tns:Version" />
+  </wsdl:message>
+  <wsdl:message name="VersionSoapOut">
+    <wsdl:part name="parameters" element="tns:VersionResponse" />
+  </wsdl:message>
+  <wsdl:message name="VersionAguilaresSoapIn">
+    <wsdl:part name="parameters" element="tns:VersionAguilares" />
+  </wsdl:message>
+  <wsdl:message name="VersionAguilaresSoapOut">
+    <wsdl:part name="parameters" element="tns:VersionAguilaresResponse" />
+  </wsdl:message>
+  <wsdl:message name="VersionUbicacionesSoapIn">
+    <wsdl:part name="parameters" element="tns:VersionUbicaciones" />
+  </wsdl:message>
+  <wsdl:message name="VersionUbicacionesSoapOut">
+    <wsdl:part name="parameters" element="tns:VersionUbicacionesResponse" />
+  </wsdl:message>
+  <wsdl:message name="SendMailPersonalSoapIn">
+    <wsdl:part name="parameters" element="tns:SendMailPersonal" />
+  </wsdl:message>
+  <wsdl:message name="SendMailPersonalSoapOut">
+    <wsdl:part name="parameters" element="tns:SendMailPersonalResponse" />
+  </wsdl:message>
+  <wsdl:message name="HelloWorldHttpGetIn" />
+  <wsdl:message name="HelloWorldHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="EnviarPosibleDiferenciaEmbarquesHttpGetIn">
+    <wsdl:part name="id_embarque" type="s:string" />
+    <wsdl:part name="Tipo" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="EnviarPosibleDiferenciaEmbarquesHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="SendMailHttpGetIn">
+    <wsdl:part name="Dest" type="s:string" />
+    <wsdl:part name="mBody" type="s:string" />
+    <wsdl:part name="mAsunto" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SendMailHttpGetOut" />
+  <wsdl:message name="ActivarbotonHttpGetIn" />
+  <wsdl:message name="ActivarbotonHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ActivarHoraInicioHttpGetIn" />
+  <wsdl:message name="ActivarHoraInicioHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="VersionHttpGetIn" />
+  <wsdl:message name="VersionHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="VersionAguilaresHttpGetIn" />
+  <wsdl:message name="VersionAguilaresHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="VersionUbicacionesHttpGetIn" />
+  <wsdl:message name="VersionUbicacionesHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="SendMailPersonalHttpGetIn">
+    <wsdl:part name="Dest" type="s:string" />
+    <wsdl:part name="mBody" type="s:string" />
+    <wsdl:part name="mAsunto" type="s:string" />
+    <wsdl:part name="usuario" type="s:string" />
+    <wsdl:part name="contraseña" type="s:string" />
+    <wsdl:part name="direccioncorreo" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SendMailPersonalHttpGetOut" />
+  <wsdl:message name="HelloWorldHttpPostIn" />
+  <wsdl:message name="HelloWorldHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="EnviarPosibleDiferenciaEmbarquesHttpPostIn">
+    <wsdl:part name="id_embarque" type="s:string" />
+    <wsdl:part name="Tipo" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="EnviarPosibleDiferenciaEmbarquesHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="SendMailHttpPostIn">
+    <wsdl:part name="Dest" type="s:string" />
+    <wsdl:part name="mBody" type="s:string" />
+    <wsdl:part name="mAsunto" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SendMailHttpPostOut" />
+  <wsdl:message name="ActivarbotonHttpPostIn" />
+  <wsdl:message name="ActivarbotonHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="ActivarHoraInicioHttpPostIn" />
+  <wsdl:message name="ActivarHoraInicioHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="VersionHttpPostIn" />
+  <wsdl:message name="VersionHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="VersionAguilaresHttpPostIn" />
+  <wsdl:message name="VersionAguilaresHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="VersionUbicacionesHttpPostIn" />
+  <wsdl:message name="VersionUbicacionesHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="SendMailPersonalHttpPostIn">
+    <wsdl:part name="Dest" type="s:string" />
+    <wsdl:part name="mBody" type="s:string" />
+    <wsdl:part name="mAsunto" type="s:string" />
+    <wsdl:part name="usuario" type="s:string" />
+    <wsdl:part name="contraseña" type="s:string" />
+    <wsdl:part name="direccioncorreo" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SendMailPersonalHttpPostOut" />
+  <wsdl:portType name="WebServiceEmbarquesSoap">
+    <wsdl:operation name="HelloWorld">
+      <wsdl:input message="tns:HelloWorldSoapIn" />
+      <wsdl:output message="tns:HelloWorldSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EnviarPosibleDiferenciaEmbarques">
+      <wsdl:input message="tns:EnviarPosibleDiferenciaEmbarquesSoapIn" />
+      <wsdl:output message="tns:EnviarPosibleDiferenciaEmbarquesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendMail">
+      <wsdl:input message="tns:SendMailSoapIn" />
+      <wsdl:output message="tns:SendMailSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Activarboton">
+      <wsdl:input message="tns:ActivarbotonSoapIn" />
+      <wsdl:output message="tns:ActivarbotonSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActivarHoraInicio">
+      <wsdl:input message="tns:ActivarHoraInicioSoapIn" />
+      <wsdl:output message="tns:ActivarHoraInicioSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Version">
+      <wsdl:input message="tns:VersionSoapIn" />
+      <wsdl:output message="tns:VersionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VersionAguilares">
+      <wsdl:input message="tns:VersionAguilaresSoapIn" />
+      <wsdl:output message="tns:VersionAguilaresSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VersionUbicaciones">
+      <wsdl:input message="tns:VersionUbicacionesSoapIn" />
+      <wsdl:output message="tns:VersionUbicacionesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendMailPersonal">
+      <wsdl:input message="tns:SendMailPersonalSoapIn" />
+      <wsdl:output message="tns:SendMailPersonalSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="WebServiceEmbarquesHttpGet">
+    <wsdl:operation name="HelloWorld">
+      <wsdl:input message="tns:HelloWorldHttpGetIn" />
+      <wsdl:output message="tns:HelloWorldHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EnviarPosibleDiferenciaEmbarques">
+      <wsdl:input message="tns:EnviarPosibleDiferenciaEmbarquesHttpGetIn" />
+      <wsdl:output message="tns:EnviarPosibleDiferenciaEmbarquesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendMail">
+      <wsdl:input message="tns:SendMailHttpGetIn" />
+      <wsdl:output message="tns:SendMailHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Activarboton">
+      <wsdl:input message="tns:ActivarbotonHttpGetIn" />
+      <wsdl:output message="tns:ActivarbotonHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActivarHoraInicio">
+      <wsdl:input message="tns:ActivarHoraInicioHttpGetIn" />
+      <wsdl:output message="tns:ActivarHoraInicioHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Version">
+      <wsdl:input message="tns:VersionHttpGetIn" />
+      <wsdl:output message="tns:VersionHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VersionAguilares">
+      <wsdl:input message="tns:VersionAguilaresHttpGetIn" />
+      <wsdl:output message="tns:VersionAguilaresHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VersionUbicaciones">
+      <wsdl:input message="tns:VersionUbicacionesHttpGetIn" />
+      <wsdl:output message="tns:VersionUbicacionesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendMailPersonal">
+      <wsdl:input message="tns:SendMailPersonalHttpGetIn" />
+      <wsdl:output message="tns:SendMailPersonalHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="WebServiceEmbarquesHttpPost">
+    <wsdl:operation name="HelloWorld">
+      <wsdl:input message="tns:HelloWorldHttpPostIn" />
+      <wsdl:output message="tns:HelloWorldHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EnviarPosibleDiferenciaEmbarques">
+      <wsdl:input message="tns:EnviarPosibleDiferenciaEmbarquesHttpPostIn" />
+      <wsdl:output message="tns:EnviarPosibleDiferenciaEmbarquesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendMail">
+      <wsdl:input message="tns:SendMailHttpPostIn" />
+      <wsdl:output message="tns:SendMailHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Activarboton">
+      <wsdl:input message="tns:ActivarbotonHttpPostIn" />
+      <wsdl:output message="tns:ActivarbotonHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActivarHoraInicio">
+      <wsdl:input message="tns:ActivarHoraInicioHttpPostIn" />
+      <wsdl:output message="tns:ActivarHoraInicioHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Version">
+      <wsdl:input message="tns:VersionHttpPostIn" />
+      <wsdl:output message="tns:VersionHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VersionAguilares">
+      <wsdl:input message="tns:VersionAguilaresHttpPostIn" />
+      <wsdl:output message="tns:VersionAguilaresHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VersionUbicaciones">
+      <wsdl:input message="tns:VersionUbicacionesHttpPostIn" />
+      <wsdl:output message="tns:VersionUbicacionesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendMailPersonal">
+      <wsdl:input message="tns:SendMailPersonalHttpPostIn" />
+      <wsdl:output message="tns:SendMailPersonalHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WebServiceEmbarquesSoap" type="tns:WebServiceEmbarquesSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="HelloWorld">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/HelloWorld" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnviarPosibleDiferenciaEmbarques">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/EnviarPosibleDiferenciaEmbarques" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendMail">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/SendMail" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Activarboton">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/Activarboton" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActivarHoraInicio">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/ActivarHoraInicio" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Version">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/Version" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VersionAguilares">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/VersionAguilares" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VersionUbicaciones">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/VersionUbicaciones" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendMailPersonal">
+      <soap:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/SendMailPersonal" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WebServiceEmbarquesSoap12" type="tns:WebServiceEmbarquesSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="HelloWorld">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/HelloWorld" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnviarPosibleDiferenciaEmbarques">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/EnviarPosibleDiferenciaEmbarques" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendMail">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/SendMail" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Activarboton">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/Activarboton" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActivarHoraInicio">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/ActivarHoraInicio" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Version">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/Version" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VersionAguilares">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/VersionAguilares" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VersionUbicaciones">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/VersionUbicaciones" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendMailPersonal">
+      <soap12:operation soapAction="http://189.206.160.206:81/WebServiceEmbarques/SendMailPersonal" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WebServiceEmbarquesHttpGet" type="tns:WebServiceEmbarquesHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="HelloWorld">
+      <http:operation location="/HelloWorld" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnviarPosibleDiferenciaEmbarques">
+      <http:operation location="/EnviarPosibleDiferenciaEmbarques" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendMail">
+      <http:operation location="/SendMail" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output />
+    </wsdl:operation>
+    <wsdl:operation name="Activarboton">
+      <http:operation location="/Activarboton" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActivarHoraInicio">
+      <http:operation location="/ActivarHoraInicio" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Version">
+      <http:operation location="/Version" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VersionAguilares">
+      <http:operation location="/VersionAguilares" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VersionUbicaciones">
+      <http:operation location="/VersionUbicaciones" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendMailPersonal">
+      <http:operation location="/SendMailPersonal" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output />
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WebServiceEmbarquesHttpPost" type="tns:WebServiceEmbarquesHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="HelloWorld">
+      <http:operation location="/HelloWorld" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EnviarPosibleDiferenciaEmbarques">
+      <http:operation location="/EnviarPosibleDiferenciaEmbarques" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendMail">
+      <http:operation location="/SendMail" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output />
+    </wsdl:operation>
+    <wsdl:operation name="Activarboton">
+      <http:operation location="/Activarboton" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActivarHoraInicio">
+      <http:operation location="/ActivarHoraInicio" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Version">
+      <http:operation location="/Version" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VersionAguilares">
+      <http:operation location="/VersionAguilares" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VersionUbicaciones">
+      <http:operation location="/VersionUbicaciones" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendMailPersonal">
+      <http:operation location="/SendMailPersonal" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output />
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WebServiceEmbarques">
+    <wsdl:port name="WebServiceEmbarquesSoap" binding="tns:WebServiceEmbarquesSoap">
+      <soap:address location="http://192.168.123.4:81/EmbarquesApk/WebServiceEmbarques/WebServiceEmbarques.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WebServiceEmbarquesSoap12" binding="tns:WebServiceEmbarquesSoap12">
+      <soap12:address location="http://192.168.123.4:81/EmbarquesApk/WebServiceEmbarques/WebServiceEmbarques.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WebServiceEmbarquesHttpGet" binding="tns:WebServiceEmbarquesHttpGet">
+      <http:address location="http://192.168.123.4:81/EmbarquesApk/WebServiceEmbarques/WebServiceEmbarques.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WebServiceEmbarquesHttpPost" binding="tns:WebServiceEmbarquesHttpPost">
+      <http:address location="http://192.168.123.4:81/EmbarquesApk/WebServiceEmbarques/WebServiceEmbarques.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

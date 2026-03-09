@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#111827">
+	<TextView
+		android:textSize="16sp"
+		android:text="Small Text"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/usercancel" />
+	<TextView
+		android:text="Pedido A Cancelar:"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:layout_width="match_parent"
+		android:layout_height="17.5dp"
+		android:textSize="16sp"
+		android:singleLine="true"
+		android:imeOptions="actionDone" />
+	<EditText
+		android:inputType="number"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/pedidocancelar" />
+	<TextView
+		android:text="Split Capturados:"
+		android:textSize="16sp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content" />
+	<GridView
+		android:verticalSpacing="3dp"
+		android:horizontalSpacing="3dp"
+		android:stretchMode="columnWidth"
+		android:gravity="center"
+		android:minWidth="25dp"
+		android:minHeight="25dp"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:numColumns="1"
+		android:id="@+id/gvCtrCancel"
+		android:layout_weight="1"
+		android:columnWidth="150dp" />
+	<TextView
+		android:text="Total de Splits: 000:"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/SplitCargados"
+		android:textSize="16sp"/>
+</LinearLayout>

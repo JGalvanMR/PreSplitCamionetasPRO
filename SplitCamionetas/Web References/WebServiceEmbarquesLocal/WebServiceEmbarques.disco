@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<discovery xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.xmlsoap.org/disco/">
+  <contractRef ref="http://192.168.123.4:81/EmbarquesApk/WebServiceEmbarques/WebServiceEmbarques.asmx?wsdl" docRef="http://192.168.123.4:81/EmbarquesApk/WebServiceEmbarques/WebServiceEmbarques.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
+  <soap address="http://192.168.123.4:81/EmbarquesApk/WebServiceEmbarques/WebServiceEmbarques.asmx" xmlns:q1="http://189.206.160.206:81/WebServiceEmbarques" binding="q1:WebServiceEmbarquesSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+  <soap address="http://192.168.123.4:81/EmbarquesApk/WebServiceEmbarques/WebServiceEmbarques.asmx" xmlns:q2="http://189.206.160.206:81/WebServiceEmbarques" binding="q2:WebServiceEmbarquesSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+</discovery>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:stretchColumns="*">
+	<LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+		<TextView
+            android:textAppearance="?android:textAppearanceSmall"
+            android:textSize="16sp"
+            android:text="SPLIT:"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/splitcantidad"
+            android:gravity="right"
+            android:singleLine="true" />
+		<TextView
+            android:textAppearance="?android:textAppearanceSmall"
+            android:textSize="16sp"
+            android:text="PEDIDO:"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/pedidoencaptura"
+            android:gravity="right"
+            android:singleLine="true" />
+		<RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:gravity="center">
+			<RadioButton
+                android:id="@+id/radio_blanco"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:checked="true"
+                android:text="CAJA X CAJA" />
+			<RadioButton
+                android:id="@+id/radio_verde"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="TARIMA COMPLETA" />
+		</RadioGroup>
+		<TextView
+            android:text="CODIGO:"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/textView12"
+            android:singleLine="true"
+            android:textSize="16sp"/>
+		<EditText
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/Folio"
+            android:imeOptions="actionDone" />
+		<Button
+            android:text="Grabar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/GuardarCapturado"
+            android:layout_marginTop="0.0dp"
+            android:autoSizeTextType="uniform"/>
+		<TextView
+            android:textSize="16sp"
+            android:text="000"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/totalcapturado" />
+	</LinearLayout>
+
+	<GridView
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:horizontalSpacing="10dp"
+        android:verticalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:numColumns="1"
+        android:minWidth="25dp"
+        android:minHeight="25dp"
+        android:layout_weight="1"
+        android:smoothScrollbar="true"
+        android:id="@+id/gvCtr2"
+        android:columnWidth="150dp"
+        android:paddingTop="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="5dp"/>
+
+	<CheckBox
+        android:textSize="16sp"
+        android:text="Eliminar Caja"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/Elicaja"/>
+</LinearLayout>
