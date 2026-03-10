@@ -161,6 +161,7 @@
     <Compile Include="capturar_split.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scanner\ScannerInputHandler.cs" />
     <Compile Include="SolicitarPed.cs" />
     <Compile Include="Web References\WebServiceEmbarquesLocal\Reference.cs">
       <AutoGen>True</AutoGen>
