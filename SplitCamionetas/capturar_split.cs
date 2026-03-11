@@ -15,7 +15,6 @@ using Plugin.DeviceInfo;
 using PreSplitCamionetas.Data;
 using PreSplitCamionetas.Modal;
 using PreSplitCamionetas.Models;
-using PreSplitCamionetas.Scanner;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -109,7 +108,6 @@ namespace PreSplitCamionetas
         DataTable FoliosleidosPresplit = new DataTable();
 
         int total_caja_verde = 0;
-        private readonly ScannerInputHandler _scannerHandler = new ScannerInputHandler();
         #endregion
         protected override async void OnCreate(Bundle savedInstanceState)
         {
@@ -944,24 +942,24 @@ namespace PreSplitCamionetas
         {
             try
             {
-                // FIX: NO llamar Clear() después de DetallePedidoAsync.
-                // DetallePedidoAsync ya hace listItem.Clear() internamente antes de llenar.
-                List<FlimStarInfo> lstFlimStar = await DetallePedidoAsync();
-
+                List<FlimStarInfo> lstFlimStar = await DetallePedidoAsync(); // Asegúrate de que 'DetallePedidoAsync' sea asincrónico
+                lstFlimStar.Clear();
                 RunOnUiThread(() =>
                 {
                     var gvObject = FindViewById<GridView>(Resource.Id.gvCtr2);
+                    gvObject.Adapter = new myGVItemAdapter(this, lstFlimStar);
                     gvObject.ItemClick -= OnGridView_ItemClicked;
                     gvObject.ItemClick += OnGridView_ItemClicked;
-                    // El adapter hace copia defensiva → safe para pasar lstFlimStar directo
-                    gvObject.Adapter = new myGVItemAdapter(this, lstFlimStar);
                 });
             }
             catch (Java.Lang.Exception ex)
             {
+                // Manejo de excepciones para ActualizarGridViewAsync
                 RunOnUiThread(() =>
-                    Toast.MakeText(this, "Error al actualizar vista: " + ex.Message, ToastLength.Short).Show());
-                throw;
+                {
+                    Toast.MakeText(this, "Error al actualizar la vista: " + ex.Message, ToastLength.Short).Show();
+                });
+                throw; // Rethrow the exception to be caught in the main method
             }
         }
         private async Task ValidarInformacionAsync1()
@@ -1553,30 +1551,40 @@ namespace PreSplitCamionetas
 
         private async Task<List<FlimStarInfo>> ProductoCapturadoAsync()
         {
+
+            //var listItem = new List<FlimStarInfo>();
             listItem.Clear();
-            // FIX: resetear TotCaj antes de contar
-            TotCaj = 0;
 
             try
             {
+                // Obtener datos de la tabla 'xprod' de manera asincrónica
                 var query = await db.GetItemsAsync<xprod>();
+
                 foreach (var captu in query)
                 {
-                    var nombreProducto = getNombreProducto(captu.Codigo.ToString().Trim()) ?? string.Empty;
+                    // Obtener el nombre del producto sin necesidad de Task.Run
+                    var nombreProducto = getNombreProducto(captu.Codigo.ToString().Trim());
+
                     listItem.Add(new FlimStarInfo()
                     {
                         Name = nombreProducto.Trim(),
                         Age = $"Recibo: {captu.Folio} Tarima: {captu.Tarima} Caja: {captu.Cajas}",
+                        //Age = "Pedido: " + captu.Folio + " Tarima: " + captu.Tarima + " Surtido: " + captu.Cajas,
                         ImageID = Resource.Drawable.producto
                     });
+
                     TotCaj++;
                 }
             }
-            catch (Java.Lang.Exception ex)
+            catch (Java.Lang.Exception ex)  // Se cambió a Exception para cubrir más tipos de excepciones
             {
+                // Manejo de excepciones en el hilo de la UI
                 RunOnUiThread(() =>
-                    Toast.MakeText(this, "Error: " + ex.Message, ToastLength.Short).Show());
+                {
+                    Toast.MakeText(this, "Error: " + ex.Message, ToastLength.Short).Show();
+                });
             }
+
             return listItem;
         }
 
@@ -2091,27 +2099,16 @@ namespace PreSplitCamionetas
 
         public string getNombreProducto(string prod_clave)
         {
-            if (string.IsNullOrEmpty(prod_clave)) return string.Empty;
+            string prod_nombre;
 
-            // FIX: conexión local — no comparte thisConnection
-            try
-            {
-                using (var conn = new SqlConnection(MainActivity.cadenaConexion))
-                {
-                    conn.Open();
-                    using (var command = new SqlCommand("SELECT dbo.getNombreProducto(@prod_clave)", conn))
-                    {
-                        command.Parameters.AddWithValue("@prod_clave", prod_clave);
-                        // FIX: null check antes de .Trim()
-                        var result = command.ExecuteScalar();
-                        return result != null ? result.ToString().Trim() : string.Empty;
-                    }
-                }
-            }
-            catch
-            {
-                return string.Empty;
-            }
+            if (thisConnection.State == ConnectionState.Closed) { thisConnection.Open(); }
+            SqlCommand command = new SqlCommand("SELECT dbo.getNombreProducto(@prod_clave)", thisConnection);
+            command.Parameters.AddWithValue("@prod_clave", prod_clave);
+            prod_nombre = (string)command.ExecuteScalar();
+            thisConnection.Close();
+
+            return prod_nombre.Trim();
+
         }
 
         private void AgregaFolioSinExistencia(string mTi, string mFo, string mPr, string mNo, string mTa, string mCa)
@@ -2183,8 +2180,9 @@ namespace PreSplitCamionetas
             var productoscapturados = await db.QueryAsync<xLote>("Select Tipo, Codigo, nombre FROM xLote GROUP BY Tipo, Codigo, nombre");
             await db.QueryAsync<XLoteSug>("delete from[XLoteSug]");
 
-            var allItems = db.GetItemsAsync<xLote>();
-            int count = allItems.Result.Count;
+            // FIX: await correcto, .Result bloqueaba el hilo UI
+            var allItems = await db.GetItemsAsync<xLote>();
+            int count = allItems.Count;
             int[] validados = new int[count + 1];
             int capturas = 0;
             foreach (var captu in productoscapturados)
@@ -2715,31 +2713,39 @@ namespace PreSplitCamionetas
                 alertDialog.Show();
                 return;
             }
-
             Guardar.Enabled = false;
-            string rawText = s?.ToString() ?? string.Empty;
+            string folio = foliocaptura.Text;
 
-            // FIX: ignorar caracteres parciales, solo procesar cuando el scanner
-            // haya terminado de emitir el código completo
-            if (!_scannerHandler.TryGetCompleteScan(rawText, out string cleanCode))
-                return;
-
-            // FIX: serializar — si hay un escaneo en curso, descartar este
-            await _scannerHandler.ProcessScanAsync(async () =>
+            if (folio != valorfinal && folio != "")
             {
-                string folio = foliocaptura.Text;
-                if (folio == valorfinal || folio == "") return;
-
                 if (Eliminar_caja.Checked)
+                {
+                    //_ = eliminaretiquetablanca();
                     await eliminaretiquetablanca();
-                else if (etiblanca.Checked)
-                    await EtiquetasBlancaAsync();
+                }
                 else
-                    await etiquestaverde();
-            });
+                {
+                    if (etiblanca.Checked)
+                    {
+                        //_ = EtiquetasBlancaAsync();
+                        await EtiquetasBlancaAsync();
+                    }
+                    else
+                    {
+                        //_ = etiquestaverde();
+                        await etiquestaverde();
+                    }
+                }
+            }
+            else
+            {
+                foliocaptura.SetSelection(0, foliocaptura.Text.Length);
+                foliocaptura.RequestFocus();
+                valorfinal = foliocaptura.Text;
+            }
         }
 
-        public async Task ActualizarEstatusEtiquetaAsync(string recibo, string producto, string tarima, string caja)
+        public async void ActualizarEstatusEtiqueta(string recibo, string producto, string tarima, string caja)
         {
             using (SqlCommand command = new SqlCommand("ActualizarEstatusEtiqueta", thisConnection))
             {
@@ -3035,22 +3041,25 @@ namespace PreSplitCamionetas
                 disponible++;
                 int n = 1;
                 int cajaactual = 1;
-                // CÓDIGO CORREGIDO
-                // mEtiqueta contiene el total de cajas de la tarima desde la BD.
-                // Usamos cajaactual como límite absoluto para evitar bucle infinito
-                // cuando todas las cajas ya están capturadas.
-                int maxCaja = string.IsNullOrEmpty(mEtiqueta)
-                    ? disponible + 50
-                    : Convert.ToInt32(mEtiqueta) + 1;
-
-                while (n < disponible && cajaactual < maxCaja)
+                // FIX: guarda para prevenir bucle infinito cuando todas las cajas
+                // de la tarima ya están capturadas (mEtiqueta = total real de la tarima).
+                int maxCajas = (mEtiqueta != "0" && !string.IsNullOrEmpty(mEtiqueta))
+                    ? Convert.ToInt32(mEtiqueta) + 1
+                    : disponible + 50;
+                while (n < disponible && cajaactual <= maxCajas)
                 {
                     if (cajaactual.ToString().Length == 1)
+                    {
                         mcaj = "00" + cajaactual.ToString();
+                    }
                     else if (cajaactual.ToString().Length == 2)
+                    {
                         mcaj = "0" + cajaactual.ToString();
+                    }
                     else
+                    {
                         mcaj = cajaactual.ToString();
+                    }
 
                     mtip = mtip.Trim();
                     mfol = mfol.Trim();
@@ -3058,91 +3067,76 @@ namespace PreSplitCamionetas
                     mtar = mtar.Trim();
                     mcaj = mcaj.Trim();
 
-                    string lectura = mtip + mfol + mcod + mtar + mcaj;
 
+
+                    string lectura = mtip + mfol + mcod + mtar + mcaj;
+                    //string lectura = Btip + captura;
                     thisConnection.Open();
                     string fechacap = ValidaCajaEtiVerde(lectura, Foliosleidos).Trim();
                     string fechacappre = ValidaCajaPreesplitVerde(lectura, FoliosleidosPresplit).Trim();
                     thisConnection.Close();
-
                     if (fechacap.Length > 0)
                     {
-                        // Caja ya capturada en embarque → saltar, NO contar como disponible usada
                         cajaactual++;
-                        // FIX: n++ aquí para que el bucle termine aunque todas estén tomadas
-                        n++;
                     }
                     else if (fechacappre.Length > 0)
                     {
-                        // Caja ya en presplit → saltar
                         cajaactual++;
-                        // FIX: n++ aquí también
-                        n++;
                     }
                     else
                     {
-                        // Caja libre → capturar
                         string cad = mtip + " | " + mfol + " | " + mcod + " | " + mtar + " | " + mcaj;
                         if (await RepetidosAsync(mtip, mfol, mcod, mtar, mcaj) != "S" || disponible > 0)
                         {
-                            string lectura2 = (mtip + mfol + mcod + mtar + mcaj).Trim();
+                            string lectura2 = mtip + mfol + mcod + mtar + mcaj;
+                            lectura2 = lectura2.Trim();
+
                             try
                             {
-                                xprod Pedidoscapturados = new xprod
-                                {
-                                    Tipo = mtip,
-                                    Folio = mfol,
-                                    Codigo = mcod,
-                                    Tarima = mtar,
-                                    Cajas = mcaj,
-                                    fecha_captura = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
-                                    tipo_captura = "V",
-                                    Lecturabd = lectura2
-                                };
+                                xprod Pedidoscapturados = new xprod { Tipo = mtip, Folio = mfol, Codigo = mcod, Tarima = mtar, Cajas = mcaj, fecha_captura = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"), tipo_captura = "V", Lecturabd = lectura2 };
                                 await db.InsertAsync(Pedidoscapturados);
 
                                 int totalx = await traetotal(mcod);
+
                                 totalx = totalx + 1;
 
+
+                                // FIX: .Result sobre GetItemsAsync bloqueaba el hilo UI → deadlock
+                                // que impedía que el while terminara y el diálogo nunca aparecía.
                                 var pedidos = await db.QueryAsync<ConPedidos>(
-                                    "Select * FROM ConPedidos Where prod_clave = ?", mcod.Trim());
+                                    "SELECT * FROM ConPedidos WHERE prod_clave = ?", mcod.Trim());
 
-                                string existeprod = "NO";
-                                foreach (var pedisur in pedidos)
+                                string existeprod = pedidos.Count > 0 ? "SI" : "NO";
+
+
+                                if (existeprod == "SI")
                                 {
-                                    await db.QueryAsync<ConPedidos>(
-                                        "UPDATE [ConPedidos] SET surtido = ? WHERE prod_clave = ?",
-                                        totalx, mcod.ToString());
-                                    existeprod = "SI";
+                                    await db.QueryAsync<ConPedidos>("UPDATE [ConPedidos] SET surtido = '" + totalx + "' WHERE prod_clave = '" + mcod.ToString() + "'");
                                 }
-
-                                if (existeprod == "NO")
+                                else
                                 {
-                                    ConPedidos ConsecutivosPedidos = new ConPedidos
-                                    {
-                                        prod_clave = mcod.ToString(),
-                                        nombre = traenom(mcod.ToString().Trim()),
-                                        pedido = 0,
-                                        surtido = Convert.ToInt16(totalx)
-                                    };
+                                    ConPedidos ConsecutivosPedidos = new ConPedidos { prod_clave = mcod.ToString(), nombre = traenom(mcod.ToString().Trim()), pedido = 0, surtido = Convert.ToInt16(totalx) };
                                     await db.InsertAsync(ConsecutivosPedidos);
                                 }
 
+                                //cajaactual++;
                                 total_caja_verde++;
-                                // FIX: TotCaj y UI deben actualizarse en hilo principal
-                                RunOnUiThread(() =>
+                                TotCaj++;
+                                total.Text = TotCaj.ToString("##0");
+
+
+
+                                listItem.Add(new FlimStarInfo()
                                 {
-                                    TotCaj++;
-                                    total.Text = TotCaj.ToString("##0");
-                                    listItem.Add(new FlimStarInfo()
-                                    {
-                                        Name = traenom(mcod.ToString().Trim()),
-                                        Age = "Recibo: " + mfol + " Tarima: " + mtar + " Caja: " + mcaj,
-                                        ImageID = Resource.Drawable.producto
-                                    });
+                                    Name = traenom(mcod.ToString().Trim()),
+                                    Age = "Recibo: " + mfol + " Tarima: " + mtar + " Caja: " + mcaj,
+                                    ImageID = Resource.Drawable.producto
                                 });
                             }
-                            catch { /* Duplicidad de Lecturabd evitada por constraint UNIQUE */ }
+                            catch
+                            {
+                                //Toast.MakeText(this, "Duplicidad Evitada", ToastLength.Short).Show();
+                            }
                         }
                         cajaactual++;
                         n++;
@@ -3177,13 +3171,9 @@ namespace PreSplitCamionetas
                 foliocaptura.RequestFocus();
                 valorfinal = foliocaptura.Text;
             }
-
-            // Actualizar GridView con snapshot inmutable (usa el adapter corregido)
-            RunOnUiThread(() =>
-            {
-                var gvObject = FindViewById<GridView>(Resource.Id.gvCtr2);
-                gvObject.Adapter = new myGVItemAdapter(this, listItem);
-            });
+            List<FlimStarInfo> lstFlimStar = listItem;
+            var gvObject = FindViewById<GridView>(Resource.Id.gvCtr2);
+            gvObject.Adapter = new myGVItemAdapter(this, lstFlimStar);
         }
 
         public async Task EtiquetasBlancaAsync()
@@ -3879,7 +3869,8 @@ namespace PreSplitCamionetas
         {
             string lectura = (mtip + mfol + mcod + mtar + mcaj).Trim();
 
-            xprod nuevaCaja = new xprod
+            // Crear el objeto xprod
+            xprod Pedidoscapturados = new xprod
             {
                 Tipo = mtip,
                 Folio = mfol,
@@ -3889,32 +3880,31 @@ namespace PreSplitCamionetas
                 fecha_captura = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
                 Lecturabd = lectura
             };
-            await db.InsertAsync(nuevaCaja);
+
+            // Insertar en la base de datos de forma asincrónica
+            await db.InsertAsync(Pedidoscapturados);
 
             int totalx = await traetotal(mcod);
-            totalx++;
 
-            // FIX: await correcto, no .Result
-            var pedidos = await db.QueryAsync<ConPedidos>(
-                "SELECT * FROM ConPedidos WHERE prod_clave = ?", mcod.Trim());
+            totalx = totalx + 1;
 
-            if (pedidos.Count > 0)
+            string existeprod = "NO";
+            // FIX: await correcto, .Result bloqueaba el hilo UI
+            var pedidos = await db.QueryAsync<ConPedidos>("Select * FROM ConPedidos Where prod_clave = '" + mcod.ToString().Trim() + "'");
+
+            foreach (var pedisur in pedidos)
             {
-                await db.ExecuteAsync(
-                    "UPDATE [ConPedidos] SET surtido = ? WHERE prod_clave = ?",
-                    totalx, mcod.Trim());
+                await db.QueryAsync<ConPedidos>("UPDATE [ConPedidos] SET surtido = '" + totalx + "' WHERE prod_clave = '" + mcod.ToString() + "'");
+                existeprod = "SI";
             }
-            else
+
+            if (existeprod == "NO")
             {
-                ConPedidos nuevo = new ConPedidos
-                {
-                    prod_clave = mcod,
-                    nombre = traenom(mcod.Trim()),
-                    pedido = 0,
-                    surtido = Convert.ToInt16(totalx)
-                };
-                await db.InsertAsync(nuevo);
+                ConPedidos ConsecutivosPedidos = new ConPedidos { prod_clave = mcod.ToString(), nombre = traenom(mcod.ToString().Trim()), pedido = 0, surtido = Convert.ToInt16(totalx) };
+                await db.InsertAsync(ConsecutivosPedidos);
             }
+
+            //LimpiarCampo();
         }
 
         private async Task GuardarEnBaseDeDatosAsyncOG(string mtip, string mfol, string mcod, string mtar, string mcaj)
@@ -3941,9 +3931,10 @@ namespace PreSplitCamionetas
             totalx = totalx + 1;
 
             string existeprod = "NO";
-            var pedidos = db.GetItemsAsync<ConPedidos>();
+            // FIX: await correcto, .Result bloqueaba el hilo UI
+            var pedidos = await db.GetItemsAsync<ConPedidos>();
 
-            foreach (var pedisur in pedidos.Result)
+            foreach (var pedisur in pedidos)
             {
                 if (pedisur.prod_clave.ToString().Trim() == mcod.ToString().Trim())
                 {
@@ -4489,17 +4480,14 @@ namespace PreSplitCamionetas
                 }
             }
 
-            await ActualizarEstatusEtiquetaAsync(mfol, mcod, mtar, mcaj);
+            ActualizarEstatusEtiqueta(mfol, mcod, mtar, mcaj);
 
             foliocaptura.SetSelection(0, foliocaptura.Text.Length);
             foliocaptura.RequestFocus();
             valorfinal = foliocaptura.Text;
 
-            RunOnUiThread(() =>
-            {
-                var gvObject = FindViewById<GridView>(Resource.Id.gvCtr2);
-                gvObject.Adapter = new myGVItemAdapter(this, listItem);
-            });
+            var gvObject = FindViewById<GridView>(Resource.Id.gvCtr2);
+            gvObject.Adapter = new myGVItemAdapter(this, listItem);
 
             //LimpiarCampo();
         }
