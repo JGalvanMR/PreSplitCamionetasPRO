@@ -38,8 +38,8 @@ namespace PreSplitCamionetas
     public partial class capturar_split : Activity, Android.Text.ITextWatcher
     {
         #region VARIABLES        
-        //public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira1;Initial Catalog =GAB_Irapuato; server=tcp:189.206.160.206,2352; Connect Timeout = 0";
-        public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira1;Initial Catalog =GAB_Irapuato; server=tcp:192.168.123.6,2352; Connect Timeout = 0";
+        //public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira2026$;Initial Catalog =GAB_Irapuato; server=tcp:189.206.160.206,2352; Connect Timeout = 0";
+        public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira2026$;Initial Catalog =GAB_Irapuato; server=tcp:192.168.123.6,2352; Connect Timeout = 0";
         public static int valido = 0, veces = 0;
         public static string cvvehiculo, cvresponsable;
         public static string vehiculo, responsable;
