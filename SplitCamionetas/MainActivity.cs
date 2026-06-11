@@ -49,8 +49,8 @@ namespace PreSplitCamionetas
     public class MainActivity : Activity
     {
         const int RequestPhoneStatePermissionId = 1000;
-        //public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira1;Initial Catalog = GAB_Irapuato; server=tcp:189.206.160.206,2352; MultipleActiveResultSets=true; Connect Timeout = 0";
-        public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira1;Initial Catalog = GAB_Irapuato; server=tcp:192.168.123.6,1433; MultipleActiveResultSets=true; Connect Timeout = 60";
+        //public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira2026$;Initial Catalog = GAB_Irapuato; server=tcp:189.206.160.206,2352; MultipleActiveResultSets=true; Connect Timeout = 0";
+        public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira2026$;Initial Catalog = GAB_Irapuato; server=tcp:192.168.123.6,1433; MultipleActiveResultSets=true; Connect Timeout = 0";
 
         public static int captura = 0;
         SqlCommand cmnd = new SqlCommand();
@@ -488,7 +488,7 @@ namespace PreSplitCamionetas
             bool isOnline = (activeConnection != null) && activeConnection.IsConnected;
             if (!isOnline || !validaservidores())
             {
-                cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira1;Initial Catalog =GAB_Irapuato; server=tcp:189.206.160.206,2352; Connect Timeout = 0";
+                cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira2026$;Initial Catalog =GAB_Irapuato; server=tcp:189.206.160.206,2352; Connect Timeout = 0";
                 INFO_FILE = "http://189.206.160.206:81/EmbarquesApk/APK_PreSplitCamionetas/version.txt";
                 if (!isOnline)
                 {

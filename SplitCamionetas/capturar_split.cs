@@ -38,8 +38,8 @@ namespace PreSplitCamionetas
     public partial class capturar_split : Activity, Android.Text.ITextWatcher
     {
         #region VARIABLES        
-        //public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira1;Initial Catalog =GAB_Irapuato; server=tcp:189.206.160.206,2352; Connect Timeout = 0";
-        public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira1;Initial Catalog =GAB_Irapuato; server=tcp:192.168.123.6,2352; Connect Timeout = 0";
+        //public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira2026$;Initial Catalog =GAB_Irapuato; server=tcp:189.206.160.206,2352; Connect Timeout = 0";
+        public static string cadenaConexion = "Persist Security Info=False;user id=sa; password=Gabira2026$;Initial Catalog =GAB_Irapuato; server=tcp:192.168.123.6,2352; Connect Timeout = 0";
         public static int valido = 0, veces = 0;
         public static string cvvehiculo, cvresponsable;
         public static string vehiculo, responsable;
@@ -2180,8 +2180,9 @@ namespace PreSplitCamionetas
             var productoscapturados = await db.QueryAsync<xLote>("Select Tipo, Codigo, nombre FROM xLote GROUP BY Tipo, Codigo, nombre");
             await db.QueryAsync<XLoteSug>("delete from[XLoteSug]");
 
-            var allItems = db.GetItemsAsync<xLote>();
-            int count = allItems.Result.Count;
+            // FIX: await correcto, .Result bloqueaba el hilo UI
+            var allItems = await db.GetItemsAsync<xLote>();
+            int count = allItems.Count;
             int[] validados = new int[count + 1];
             int capturas = 0;
             foreach (var captu in productoscapturados)
@@ -3040,7 +3041,12 @@ namespace PreSplitCamionetas
                 disponible++;
                 int n = 1;
                 int cajaactual = 1;
-                while (n < disponible)
+                // FIX: guarda para prevenir bucle infinito cuando todas las cajas
+                // de la tarima ya están capturadas (mEtiqueta = total real de la tarima).
+                int maxCajas = (mEtiqueta != "0" && !string.IsNullOrEmpty(mEtiqueta))
+                    ? Convert.ToInt32(mEtiqueta) + 1
+                    : disponible + 50;
+                while (n < disponible && cajaactual <= maxCajas)
                 {
                     if (cajaactual.ToString().Length == 1)
                     {
@@ -3095,16 +3101,12 @@ namespace PreSplitCamionetas
                                 totalx = totalx + 1;
 
 
-                                var pedidos = db.GetItemsAsync<ConPedidos>();
+                                // FIX: .Result sobre GetItemsAsync bloqueaba el hilo UI → deadlock
+                                // que impedía que el while terminara y el diálogo nunca aparecía.
+                                var pedidos = await db.QueryAsync<ConPedidos>(
+                                    "SELECT * FROM ConPedidos WHERE prod_clave = ?", mcod.Trim());
 
-                                string existeprod = "NO";
-                                foreach (var pedisur in pedidos.Result)
-                                {
-                                    if (pedisur.prod_clave.ToString().Trim() == mcod.ToString().Trim())
-                                    {
-                                        existeprod = "SI";
-                                    }
-                                }
+                                string existeprod = pedidos.Count > 0 ? "SI" : "NO";
 
 
                                 if (existeprod == "SI")
@@ -3887,9 +3889,10 @@ namespace PreSplitCamionetas
             totalx = totalx + 1;
 
             string existeprod = "NO";
-            var pedidos = db.QueryAsync<ConPedidos>("Select * FROM ConPedidos Where prod_clave = '" + mcod.ToString().Trim() + "'");
+            // FIX: await correcto, .Result bloqueaba el hilo UI
+            var pedidos = await db.QueryAsync<ConPedidos>("Select * FROM ConPedidos Where prod_clave = '" + mcod.ToString().Trim() + "'");
 
-            foreach (var pedisur in pedidos.Result)
+            foreach (var pedisur in pedidos)
             {
                 await db.QueryAsync<ConPedidos>("UPDATE [ConPedidos] SET surtido = '" + totalx + "' WHERE prod_clave = '" + mcod.ToString() + "'");
                 existeprod = "SI";
@@ -3928,9 +3931,10 @@ namespace PreSplitCamionetas
             totalx = totalx + 1;
 
             string existeprod = "NO";
-            var pedidos = db.GetItemsAsync<ConPedidos>();
+            // FIX: await correcto, .Result bloqueaba el hilo UI
+            var pedidos = await db.GetItemsAsync<ConPedidos>();
 
-            foreach (var pedisur in pedidos.Result)
+            foreach (var pedisur in pedidos)
             {
                 if (pedisur.prod_clave.ToString().Trim() == mcod.ToString().Trim())
                 {
