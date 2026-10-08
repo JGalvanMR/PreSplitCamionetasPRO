@@ -1621,6 +1621,7 @@ namespace PreSplitCamionetas
                 string mtip = "", mfol = "", mcod = "", mtar = "", mcaj = "", mfeccap = "";
                 string amtip = "", amfol = "", amcod = "", amtar = "", amcaj = "", amfeccap = "";
                 var conta = 0;
+                var detalleErrores = new List<string>();
                 var productoscapturados = await db.GetItemsAsync<xprod>();
 
                 foreach (var captu in productoscapturados)
@@ -1773,6 +1774,7 @@ namespace PreSplitCamionetas
                     if (er == "S")
                     {
                         tot++;
+                        detalleErrores.Add("Tipo: " + mtip + " | Folio: " + mfol + " | Producto: " + mcod + " | Tarima: " + mtar + " | Caja: " + mcaj + " | " + nom);
                     }
                 }
 
@@ -1834,6 +1836,7 @@ namespace PreSplitCamionetas
                         await db.QueryAsync<ConPedidos>("UPDATE [ConPedidos] SET surtido = surtido - " + mcajas + " WHERE prod_clave = '" + mcod.ToString().Trim() + "'");
 
                         tot++;
+                        detalleErrores.Add("Tipo: " + mtip + " | Folio: " + mfol + " | Producto: " + mcod + " | Tarima: " + mtar + " | " + traenom(mcod.Trim()) + " (no existe)");
                         continue;
                     }
 
@@ -1910,6 +1913,7 @@ namespace PreSplitCamionetas
                         if (er == "S")
                         {
                             tot++;
+                            detalleErrores.Add("Tipo: " + mtip + " | Folio: " + mfol + " | Producto: " + mcod + " | Tarima: " + mtar + " | " + traenom(mcod.Trim()) + " (supera lo producido por " + ((mS + cant) - mP) + " cajas)");
                         }
 
 
@@ -1926,13 +1930,7 @@ namespace PreSplitCamionetas
                     Mensajes mensa = new Mensajes
                     {
                         titulo = "Se detectaron etiquetas con ERROR",
-                        mensaje = "Se detectaron " + tot + " Etiquetas con error" + "\n\r" + "Detalle de la Etiqueta: \n\r" +
-                        "Tipo: " + mtip + "\n\r" +
-                        "Folio: " + mfol + "\n\r" +
-                        "Producto: " + mcod + "\n\r" +
-                        "Tarima: " + mtar + "\n\r" +
-                        "Caja: " + mcaj + "\n\r" +
-                        "Nombre: " + traenom(mcod.Trim()) + ""
+                        mensaje = "Se detectaron " + tot + " Etiquetas con error" + "\n\r" + "Detalle:\n\r" + string.Join("\n\r", detalleErrores)
                     };
                     await db.InsertAsync(mensa);
 
@@ -4656,6 +4654,8 @@ namespace PreSplitCamionetas
             {
                 tipoprod = captu.Tipo.ToString().Trim();
                 producto = captu.Codigo.ToString().Trim();
+                // El acumulado es por producto; si no se reinicia, los preautorizados de un producto afectan la validación de los demás
+                totaldisponibles = 0;
 
                 if (tipoprod == "PTP")
                 {
@@ -4676,7 +4676,8 @@ namespace PreSplitCamionetas
 
                 //traigo el total de cajas capturadas para hacer las validaciones correspondientes
                 int total_prod_simula = 0;
-                var prodcapx = await db.QueryAsync<xLote>("Select COUNT(ID) AS Cajas FROM xLote Where Codigo = '" + producto.Trim() + "'");
+                // Se lee de xprod (lo capturado ahora); xLote se reconstruye hasta después de esta validación y trae datos de la validación anterior
+                var prodcapx = await db.QueryAsync<xprod>("Select COUNT(ID) AS Cajas FROM xprod Where Codigo = '" + producto.Trim() + "' AND Tipo = '" + tipoprod + "'");
                 foreach (var capturadox in prodcapx)
                 {
                     total_prod_simula = Convert.ToInt32(capturadox.Cajas.ToString().Trim());
@@ -4689,7 +4690,7 @@ namespace PreSplitCamionetas
 
                     if (total_prod_simula > 0)
                     {
-                        var prodcap = await db.QueryAsync<xLote>("Select COUNT(ID) AS Cajas FROM xLote Where Codigo = '" + producto.Trim() + "' AND Folio = '" + row["recibo"].ToString().Trim() + "'  AND CAST(Tarima as int) = '" + Convert.ToInt32(row["tarima"].ToString().Trim()) + "'");
+                        var prodcap = await db.QueryAsync<xprod>("Select COUNT(ID) AS Cajas FROM xprod Where Codigo = '" + producto.Trim() + "' AND Tipo = '" + tipoprod + "' AND Folio = '" + row["recibo"].ToString().Trim() + "'  AND CAST(Tarima as int) = '" + Convert.ToInt32(row["tarima"].ToString().Trim()) + "'");
                         int usadas = 0;
                         foreach (var capturado in prodcap)
                         {
