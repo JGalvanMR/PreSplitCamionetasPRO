@@ -5097,7 +5097,7 @@ namespace PreSplitCamionetas
                                     ValiFechacad = "N";
 
                                     // Este folio absorbe parte de las cajas capturadas de folios mas nuevos; seguir con el siguiente mas antiguo
-                                    totalpro = totalpro - Math.Min(totaldis, totalpro);
+                                    totalpro = totalpro - System.Math.Min(totaldis, totalpro);
                                 }
                             }
                             else
