@@ -2628,61 +2628,79 @@ namespace PreSplitCamionetas
 
         private async Task AgregaDetaEtiAdelantado()
         {
-            var recibosatrasusa = await db.QueryAsync<XLoteSug>("Select * FROM [XLoteSug] Where Cajasusadas != 0 Order By recibosug, cveprod ASC");
-            foreach (var recibos in recibosatrasusa)
+            // Folios anteriores disponibles detectados en la validacion (el mas antiguo primero, en orden de insercion)
+            var sugeridos = await db.QueryAsync<XLoteSug>("SELECT * FROM [XLoteSug] WHERE foliomens = 'S' AND cajasdis != 0 ORDER BY Id ASC");
+            if (sugeridos.Count == 0) return;
+
+            // Lotes vencidos o sobresurtidos (Cajasdis = 0): no se auditan como folio adelantado
+            var vencidos = await db.QueryAsync<XLoteSug>("SELECT * FROM [XLoteSug] WHERE cajasdis = 0 AND cajasusadas != 0");
+
+            var productoscap = await db.QueryAsync<xLoteFinal>("SELECT DISTINCT(Codigo) FROM [xLoteFinal] ORDER BY Codigo ASC");
+
+            const string insertSql = "INSERT INTO tb_det_folio_adelantado (responsable, fecha, emb_folio, recibo_cap, fecreccap, recibo_sug, fecrecsug, prod_clave, producto, cantidad, autorizo, tarimacap, tarimasug, imei, motivo, fechareal) " +
+                                     "VALUES (@responsable, @fecha, @embfolio, @recibocap, @fecreccap, @recibosug, @fecrecsug, @prod, @producto, @cantidad, @autorizo, @tarimacap, @tarimasug, @imei, @motivo, GETDATE())";
+
+            try
             {
-                if (recibos.Cajasusadas > 0)
+                if (thisConnection.State == ConnectionState.Closed) { thisConnection.Open(); }
+
+                foreach (var productos in productoscap)
                 {
-                    await db.QueryAsync<xLote>("UPDATE [xLoteFinal] SET cajas = CAST(Cajas as int) - " + recibos.Cajasusadas + " WHERE Folio = '" + recibos.recibosug.ToString().Trim() + "' AND Codigo = '" + recibos.cveprod.ToString().Trim() + "' AND CAST(Tarima as int) = " + Convert.ToInt32(recibos.Tarima.ToString()));
-                }
-            }
+                    string codigo = productos.Codigo.Trim();
+                    var sugProd = sugeridos.Where(s => s.cveprod.Trim() == codigo).ToList();
+                    if (sugProd.Count == 0) continue;
 
-            var productoscap = await db.QueryAsync<xLoteFinal>("Select DISTINCT(Codigo) FROM [xLoteFinal] Order By Codigo ASC");
-            foreach (var productos in productoscap)
-            {
-                var recibosatras = await db.QueryAsync<XLoteSug>("Select  *  FROM XLoteSug Where cveprod = '" + productos.Codigo.Trim() + "' AND cajasdis != 0 AND foliomens = 'S' ORDER BY recibosug, Tarima LIMIT 1");
-                foreach (var recibos in recibosatras)
-                {
-
-                    var folio = recibos.recibosug.Trim();
-                    var producto = recibos.cveprod.Trim();
-                    var tarima = recibos.Tarima.Trim();
-                    var feccad = recibos.fecrecsug.Trim();
-
-                    var recibosCapturados = await db.QueryAsync<xLote>("Select * FROM [xLoteFinal] Where Codigo = '" + recibos.cveprod.ToString().Trim() + "' Order By Pedido, codigo");
-                    foreach (var reccapturado in recibosCapturados)
+                    var lotes = await db.QueryAsync<xLoteFinal>("SELECT * FROM [xLoteFinal] WHERE Codigo = ? ORDER BY Pedido, Folio, Tarima", codigo);
+                    foreach (var lote in lotes)
                     {
-                        string fechacaducidadcapturado = reccapturado.diacad.Trim() + "/" + reccapturado.mescad.Trim();
-                        if (reccapturado.Folio.Trim() != folio && reccapturado.Tarima.Trim() != tarima)
+                        int cajas;
+                        if (!int.TryParse((lote.Cajas ?? "").Trim(), out cajas) || cajas <= 0) continue;
+
+                        string folioCap = lote.Folio.Trim();
+                        string tarimaCap = lote.Tarima.Trim();
+
+                        // Lote vencido/sobresurtido: no cuenta
+                        if (vencidos.Any(v => v.cveprod.Trim() == codigo && v.recibosug.Trim() == folioCap && MismaTarima(v.Tarima, tarimaCap))) continue;
+
+                        string fechaCap = lote.diacad.Trim() + "/" + lote.mescad.Trim();
+
+                        // Primer folio anterior (el mas antiguo) distinto del lote capturado y con otra caducidad
+                        var sug = sugProd.FirstOrDefault(s => !(s.recibosug.Trim() == folioCap && MismaTarima(s.Tarima, tarimaCap)) && fechaCap != s.fecrecsug.Trim());
+                        if (sug == null) continue;
+
+                        using (var cmd = new SqlCommand(insertSql, thisConnection))
                         {
-                            if (fechacaducidadcapturado != feccad)
-                            {
-                                if (thisConnection.State == ConnectionState.Closed) { thisConnection.Open(); }
-                                string cadena = "insert into tb_det_folio_adelantado (responsable, fecha, emb_folio, recibo_cap, fecreccap, recibo_sug, fecrecsug, prod_clave, producto, cantidad, autorizo, tarimacap, tarimasug, imei, motivo, fechareal) " +
-                               "Values('" + responsable + "','" + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + "','" + reccapturado.Folio + "', '" + reccapturado.Folio + "', '" + reccapturado.diacad + "/" + reccapturado.mescad + "','" + recibos.recibosug + "', '" + recibos.fecrecsug + "', '" + recibos.cveprod + "', '" + reccapturado.nombre + "', '" + reccapturado.Cajas + "', '" + mAutoriza.Trim() + "', '" + reccapturado.Tarima.Trim() + "', '" + recibos.Tarima.Trim() + "', '" + imei + "', '" + motfolade.Trim() + " Pre-Split', GETDATE())";
-                                SqlCommand cmd = new SqlCommand(cadena, thisConnection);
-                                cmd.ExecuteNonQuery();
-                                if (thisConnection.State == ConnectionState.Open) { thisConnection.Close(); }
-                                break;
-                            }
-                        }
-                    }
-
-
-
-                    /*var recibosCapturados = db.Query<xLote>("Select * FROM [xLoteFinal] Where Codigo = '" + recibos.cveprod.ToString().Trim() + "' Order By Pedido, codigo ASC");
-                    foreach (var reccapturado in recibosCapturados)
-                    {
-                        if (Convert.ToInt32(reccapturado.Cajas) > 0)
-                        {
-                            string cadena = "insert into tb_det_folio_adelantado (responsable, fecha, emb_folio, recibo_cap, fecreccap, recibo_sug, fecrecsug, prod_clave, producto, cantidad, autorizo, tarimacap, tarimasug) " +
-                                "Values('" + responsable + "','" + DateTime.Now.ToString("dd/MM/yyyy") + "','" + reccapturado.Pedido + "', '" + reccapturado.Folio + "', '" + reccapturado.diacad + "/" + reccapturado.mescad + "','" + recibos.recibosug + "', '" + recibos.fecrecsug + "', '" + recibos.cveprod + "', '" + reccapturado.nombre + "', '" + reccapturado.Cajas + "', '" + mAutoriza.Trim() + "', '" + reccapturado.Tarima.Trim() + "', '" + recibos.Tarima.Trim() + "')";
-                            SqlCommand cmd = new SqlCommand(cadena, thisConnection);
+                            cmd.Parameters.AddWithValue("@responsable", responsable ?? "");
+                            cmd.Parameters.AddWithValue("@fecha", DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt"));
+                            cmd.Parameters.AddWithValue("@embfolio", folioCap);
+                            cmd.Parameters.AddWithValue("@recibocap", folioCap);
+                            cmd.Parameters.AddWithValue("@fecreccap", fechaCap);
+                            cmd.Parameters.AddWithValue("@recibosug", sug.recibosug.Trim());
+                            cmd.Parameters.AddWithValue("@fecrecsug", sug.fecrecsug.Trim());
+                            cmd.Parameters.AddWithValue("@prod", codigo);
+                            cmd.Parameters.AddWithValue("@producto", lote.nombre ?? "");
+                            cmd.Parameters.AddWithValue("@cantidad", cajas.ToString());
+                            cmd.Parameters.AddWithValue("@autorizo", (mAutoriza ?? "").Trim());
+                            cmd.Parameters.AddWithValue("@tarimacap", tarimaCap);
+                            cmd.Parameters.AddWithValue("@tarimasug", sug.Tarima.Trim());
+                            cmd.Parameters.AddWithValue("@imei", imei ?? "");
+                            cmd.Parameters.AddWithValue("@motivo", (motfolade ?? "").Trim() + " Pre-Split");
                             cmd.ExecuteNonQuery();
                         }
-                    }*/
+                    }
                 }
             }
+            finally
+            {
+                if (thisConnection.State == ConnectionState.Open) { thisConnection.Close(); }
+            }
+        }
+
+        private static bool MismaTarima(string a, string b)
+        {
+            int ia, ib;
+            if (int.TryParse((a ?? "").Trim(), out ia) && int.TryParse((b ?? "").Trim(), out ib)) return ia == ib;
+            return (a ?? "").Trim() == (b ?? "").Trim();
         }
 
         async void ITextWatcher.AfterTextChanged(IEditable s)
@@ -4979,15 +4997,16 @@ namespace PreSplitCamionetas
                                  "recibo, tarima, DATEDIFF(day, GETDATE(), (CASE fecha_cad WHEN '' THEN FORMAT(DATEADD(day, " + diascad + ", pti_fecha), 'yyyyMMdd', 'en-US') ELSE FORMAT(convert(datetime, fecha_cad), 'yyyyMMdd', 'en-US') END)) AS diasdisp, preautorizado " +
                                  "FROM TB_DET_TRAZABILIDAD INNER JOIN tb_mstr_recepcion_pt ON rpt_recibo = recibo " +
                                  "WHERE (preautorizado = '' or preautorizado is null) AND PROD_CLAVE = '" + prod + "' AND pti_estatus_sur = '' AND tipo = 'PTC' AND " +
-                                 "(rpt_tipo != 'TR' OR (rpt_tipo != 'TR' AND rpt_inventario = 'S')) AND rpt_estatus = '' AND (etiqueta - surtido) > 0 ORDER BY fecha_cadu";
+                                 "(rpt_tipo != 'TR' OR (rpt_tipo != 'TR' AND rpt_inventario = 'S')) AND rpt_estatus = '' AND (etiqueta - surtido) > 0 ORDER BY fecha_cadu, recibo, tarima";
                     }
                     else
                     {
-                        cadena = "SELECT (num_cajas - cajas_sur) AS disponible, ISNULL(NULLIF(fechacad, ' '), FORMAT(DATEADD(day, " + diascad + ", fecha), 'yyyyMMdd', 'en-US')) AS fecha_cad, " +
-                                 "folio AS recibo, tarima, DATEDIFF(day, GETDATE(), fechacad) AS diasdisp, preautorizado " +
+                        string fechacadExpr = "ISNULL(NULLIF(fechacad, ' '), FORMAT(DATEADD(day, " + diascad + ", fecha), 'yyyyMMdd', 'en-US'))";
+                        cadena = "SELECT (num_cajas - cajas_sur) AS disponible, " + fechacadExpr + " AS fecha_cad, " +
+                                 "folio AS recibo, tarima, DATEDIFF(day, GETDATE(), CONVERT(datetime, " + fechacadExpr + ", 112)) AS diasdisp, preautorizado " +
                                  "FROM tb_det_eti_final INNER JOIN tb_mstr_ordenes_prod ON folio = ordp_folio " +
                                  "WHERE (preautorizado = '' or preautorizado is null) AND cve_prod = '" + prod + "' AND estatus_sur != 'S' AND ordp_estatus != 'C' AND etiqueta = 'S' AND " +
-                                 "(num_cajas - cajas_sur) > 0 ORDER BY fecha_cad";
+                                 "(num_cajas - cajas_sur) > 0 ORDER BY fecha_cad, folio, tarima";
                     }
 
                     SqlDataAdapter da = new SqlDataAdapter(cadena, thisConnection);
@@ -5041,31 +5060,44 @@ namespace PreSplitCamionetas
 
                                     foreach (var capturado in prodcapfecad)
                                     {
+                                        // Cajas de OTROS folios con la misma caducidad (equivalentes para FIFO).
+                                        // Las de este mismo folio (usadasant) ya se descontaron arriba.
                                         usadas = Convert.ToInt32(capturado.Cajas.ToString().Trim()) - usadasant;
-                                        totaldis = Convert.ToInt32(totaldis) - Convert.ToInt32(capturado.Cajas.ToString().Trim());
+                                        totaldis = totaldis - usadas;
                                         simulador = simulador + totaldis;
                                         totalpro = totalpro - usadas;
                                         totaldisponibles = totaldisponibles + totaldis;
                                     }
                                 }
 
-                                if (totaldis > 0)
+                                // Hay cajas capturadas de folios mas nuevos mientras este folio mas antiguo aun tiene disponibilidad
+                                if (totaldis > 0 && totalpro > 0)
                                 {
-                                    if (totalpro > 0)
+                                    XLoteSug sugeridos = new XLoteSug
                                     {
-                                        XLoteSug sugeridos = new XLoteSug
-                                        {
-                                            recibosug = row["recibo"].ToString().Trim(),
-                                            fecrecsug = diacad + "/" + mescad,
-                                            cveprod = prod,
-                                            Tarima = row["tarima"].ToString().Trim(),
-                                            Cajasdis = totaldisreal,
-                                            Cajasusadas = usadas,
-                                            foliomens = row["diasdisp"].ToString().Trim()
-                                        };
-                                        await db.InsertAsync(sugeridos);
-                                        break;
-                                    }
+                                        recibosug = row["recibo"].ToString().Trim(),
+                                        fecrecsug = diacad + "/" + mescad,
+                                        cveprod = prod,
+                                        Tarima = row["tarima"].ToString().Trim(),
+                                        Cajasdis = totaldisreal,
+                                        Cajasusadas = usadasant,   // cajas capturadas de este mismo folio
+                                        foliomens = "S"
+                                    };
+                                    await db.InsertAsync(sugeridos);
+
+                                    Mensajes mensa = new Mensajes
+                                    {
+                                        titulo = "Existe un folio anterior disponible",
+                                        mensaje = "El recibo " + "\n\r" + sugeridos.recibosug + " De la tarima  " + sugeridos.Tarima +
+                                                  " Tiene  " + sugeridos.Cajasdis + " cajas disponibles del producto: " + captu.nombre.Trim() +
+                                                  " Con Fecha de Caducidad del " + sugeridos.fecrecsug + ", Dias disponibles " + row["diasdisp"].ToString().Trim() +
+                                                  ", Favor de Buscar a personal de Camaras Frias para la autorizacion"
+                                    };
+                                    await db.InsertAsync(mensa);
+                                    ValiFechacad = "N";
+
+                                    // Este folio absorbe parte de las cajas capturadas de folios mas nuevos; seguir con el siguiente mas antiguo
+                                    totalpro = totalpro - Math.Min(totaldis, totalpro);
                                 }
                             }
                             else
@@ -5075,43 +5107,6 @@ namespace PreSplitCamionetas
                         }
                     }
 
-                    // Obtener sugerencias de XLoteSug
-                    var loteSug = await db.QueryAsync<XLoteSug>("SELECT * FROM XLoteSug WHERE cveprod = ? AND cajasdis != 0 LIMIT 1", captu.Codigo.Trim());
-
-                    foreach (var capturado in loteSug)
-                    {
-                        string recibosug = capturado.recibosug;
-                        string fecrecsug = capturado.fecrecsug;
-                        string cveprod = capturado.cveprod;
-                        string tarima = capturado.Tarima;
-                        int cajasdis = capturado.Cajasdis;
-                        int cajasusadas = capturado.Cajasusadas;
-                        string diasdif = capturado.foliomens;
-
-                        Mensajes mensa = new Mensajes
-                        {
-                            titulo = "Existe un folio anterior disponible",
-                            mensaje = "El recibo " + "\n\r" + capturado.recibosug.ToString().Trim() + " De la tarima  " + capturado.Tarima.Trim() +
-                                      " Tiene  " + capturado.Cajasdis + " cajas disponibles del producto: " + captu.nombre.Trim() +
-                                      " Con Fecha de Caducidad del " + capturado.fecrecsug + ", Dias disponibles " + diasdif +
-                                      ", Favor de Buscar a personal de Camaras Frias para la autorizacion"
-                        };
-                        await db.InsertAsync(mensa);
-                        ValiFechacad = "N";
-
-                        XLoteSug sugeridosact = new XLoteSug
-                        {
-                            recibosug = recibosug.ToString().Trim(),
-                            fecrecsug = fecrecsug,
-                            cveprod = cveprod,
-                            Tarima = tarima.ToString().Trim(),
-                            Cajasdis = cajasdis,
-                            Cajasusadas = cajasusadas,
-                            foliomens = "S"
-                        };
-                        await db.InsertAsync(sugeridosact);
-                        totalpro = 0;
-                    }
                 }
                 return Valor;
             }
